@@ -4,7 +4,7 @@ import { AlertCircleIcon } from "lucide-react";
 import CheckoutForm from "@/components/checkout-form";
 
 export default async function Home() {
-  const { success } = await getProduct();
+  const response = await getProduct();
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -18,7 +18,7 @@ export default async function Home() {
           </div>
         </div>
 
-        {!success ? (
+        {!response.success ? (
           <Alert variant="destructive">
             <AlertCircleIcon />
             <AlertTitle>Unable to fetch ticket information.</AlertTitle>
@@ -30,7 +30,7 @@ export default async function Home() {
             </AlertDescription>
           </Alert>
         ) : (
-          <CheckoutForm />
+          <CheckoutForm product={response.data} />
         )}
       </div>
     </div>
