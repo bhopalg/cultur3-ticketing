@@ -43,6 +43,8 @@ export default function CheckoutForm({ product }: CheckoutFormProps) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
     console.log(values);
+
+    if (values.honeyPot != "") return;
   }
 
   return (
