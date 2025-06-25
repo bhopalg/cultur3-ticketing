@@ -28,13 +28,23 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircleIcon } from "lucide-react";
 import { getMember } from "@/actions/supabase/get-member";
 import { getTicket } from "@/actions/supabase/get-ticket";
+import { useSearchParams } from "next/navigation";
+import LoadingSpinner from "../loading-spinner";
 
 interface CheckoutFormProps {
   product: Product;
 }
 
 export default function CheckoutForm({ product }: CheckoutFormProps) {
-  const [error, setError] = useState<string | null>(null);
+  const params = useSearchParams();
+
+  const [loading, setLoading] = useState(false);
+  // const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(
+    params.get("status") === "cancel"
+      ? "Cancelled or failed checkout. Please try again."
+      : null,
+  );
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -49,34 +59,45 @@ export default function CheckoutForm({ product }: CheckoutFormProps) {
 
   async function onSubmit(values: FormData) {
     if (values.honeyPot !== "") return;
+    setLoading(true);
 
-    const memberResponse = await getMember(values.email);
+    try {
+      const memberResponse = await getMember(values.email);
 
-    if (!memberResponse.success) {
-      setError("Member not found. Please check your email or sign up.");
-      return;
-    }
+      if (!memberResponse.success) {
+        setError("Member not found. Please check your email or sign up.");
+        setLoading(false);
+        return;
+      }
 
-    const existingTicket = await getTicket(memberResponse.data.id);
+      const existingTicket = await getTicket(memberResponse.data.id);
 
-    if (!existingTicket.success) {
-      setError("You already have a ticket. Please check your email.");
-      return;
-    }
+      if (!existingTicket.success) {
+        setError("You already have a ticket. Please check your email.");
+        setLoading(false);
+        return;
+      }
 
-    const response = await createSessionCheckout(
-      product.defaultPrice.id,
-      memberResponse.data.email,
-      memberResponse.data.id,
-    );
+      const response = await createSessionCheckout(
+        product.defaultPrice.id,
+        memberResponse.data.email,
+        memberResponse.data.id,
+      );
 
-    if (!response.success) {
-      setError("Failed to create checkout session. Please try again.");
-      return;
-    }
+      if (!response.success) {
+        setError("Failed to create checkout session. Please try again.");
+        setLoading(false);
+        return;
+      }
 
-    if (response.data.url != null) {
-      window.location.href = response.data.url;
+      if (response.data.url != null) {
+        window.location.href = response.data.url;
+      }
+    } catch (e) {
+      const errorMessage = e instanceof Error ? e.message : "An error occurred";
+      setError(errorMessage);
+      console.error("Checkout error:", errorMessage);
+      setLoading(false);
     }
   }
 
@@ -215,8 +236,15 @@ export default function CheckoutForm({ product }: CheckoutFormProps) {
               </div>
 
               {/* Complete Order Button */}
-              <Button className="w-full h-12 text-base font-semibold">
-                Complete Booking - {formatPrice(product.defaultPrice)}
+              <Button
+                className="w-full h-12 text-base font-semibold"
+                disabled={loading}
+              >
+                {loading ? (
+                  <LoadingSpinner className="text-zinc-50" />
+                ) : (
+                  <>Complete Booking - {formatPrice(product.defaultPrice)}</>
+                )}
               </Button>
               <p className="text-xs text-gray-500 text-center">
                 Powered by Stripe.
