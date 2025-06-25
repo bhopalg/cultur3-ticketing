@@ -2,11 +2,11 @@
 
 import { stripe } from "@/lib/stripe";
 import { ActionResponse } from "@/types/ActionResponse";
-import Stripe from "stripe";
+import { Checkout } from "@/types/Checkout";
 
 export async function createSessionCheckout(
   priceId: string,
-): Promise<ActionResponse<Stripe.Checkout.Session>> {
+): Promise<ActionResponse<Checkout>> {
   try {
     const response = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -19,11 +19,20 @@ export async function createSessionCheckout(
       mode: "payment",
       success_url: "http://localhost:3000/?status=success",
       cancel_url: "http://localhost:3000/?status=cancel",
+      // get email from the user
+      customer_email: "gbhopal91@gmail.com",
+      metadata: {
+        // Add any additional metadata you want to store
+        id: "",
+      },
     });
 
     return {
       success: true,
-      data: response,
+      data: {
+        url: response.url,
+        id: response.id,
+      },
       message: "Checkout session created successfully",
     };
   } catch (error) {

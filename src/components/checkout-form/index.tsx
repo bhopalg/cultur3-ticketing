@@ -52,11 +52,16 @@ export default function CheckoutForm({ product }: CheckoutFormProps) {
 
     if (values.honeyPot !== "") return;
 
-    const { success } = await createSessionCheckout(product.defaultPrice.id);
+    const response = await createSessionCheckout(product.defaultPrice.id);
 
-    if (!success) {
+    if (!response.success) {
       setError("Failed to create checkout session. Please try again.");
       return;
+    }
+
+    // redirect to Stripe checkout
+    if (response.data.url != null) {
+      window.location.href = response.data.url;
     }
   }
 
