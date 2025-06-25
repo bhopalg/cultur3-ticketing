@@ -1,13 +1,13 @@
 import Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { NextResponse } from "next/server";
+import supabaseAdmin from "@/lib/supabase/admin";
 
 export async function POST(req: Request) {
   const body = await req.text();
   const signature = req.headers.get("stripe-signature")!;
 
   let event: Stripe.Event;
-  debugger;
 
   try {
     event = stripe.webhooks.constructEvent(
@@ -23,19 +23,44 @@ export async function POST(req: Request) {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
-    const metadata = session.metadata as { id: string };
+
+    const metadata = session.metadata as {
+      id: string;
+    };
 
     if (!metadata?.id) {
       console.error("Missing memberId in metadata");
       return NextResponse.json({ error: "Missing memberId" }, { status: 400 });
     }
 
-    console.log("Payment Complete:", {
-      email: session.customer_email,
-      firstName: metadata.id,
+    // ✅ Check if the member exists in Supabase
+    const { data: member, error } = await supabaseAdmin
+      .from("members")
+      .select("*")
+      .eq("id", metadata?.id)
+      .single();
+
+    if (error) {
+      console.error("Error fetching member from Supabase:", error.message);
+      return NextResponse.json(
+        { error: "Supabase lookup failed" },
+        { status: 500 },
+      );
+    }
+
+    const { error: insertError } = await supabaseAdmin.from("tickets").insert({
+      member_id: member.id,
+      stripe_product_id: process.env.STRIPE_PRODUCT_ID!,
+      transaction_id: session.id,
     });
 
-    // ✅ Your TODO: Add user to your database here
+    if (insertError) {
+      console.error(
+        "Error fetching member from Supabase:",
+        insertError.message,
+      );
+      return NextResponse.json({ error: insertError.message }, { status: 500 });
+    }
   }
 
   return NextResponse.json({ received: true });

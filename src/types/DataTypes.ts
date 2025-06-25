@@ -57,18 +57,21 @@ export type Database = {
           id: string;
           member_id: string;
           stripe_product_id: string;
+          transaction_id: string;
         };
         Insert: {
           created_at?: string;
           id?: string;
           member_id: string;
           stripe_product_id: string;
+          transaction_id: string;
         };
         Update: {
           created_at?: string;
           id?: string;
           member_id?: string;
           stripe_product_id?: string;
+          transaction_id?: string;
         };
         Relationships: [
           {
