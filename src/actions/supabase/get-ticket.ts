@@ -1,12 +1,11 @@
 "use server";
 
 import { ActionResponse } from "@/types/ActionResponse";
-import { Ticket } from "@/types/Ticket";
 import supabase from "@/lib/supabase/client";
 
 export async function getTicket(
   memberId: string,
-): Promise<ActionResponse<Ticket>> {
+): Promise<ActionResponse<{ hasATicket: boolean }>> {
   try {
     const { data } = await supabase
       .from("tickets")
@@ -15,7 +14,7 @@ export async function getTicket(
       .eq("stripe_product_id", process.env.STRIPE_PRODUCT_ID!)
       .single();
 
-    if (!data) {
+    if (data) {
       return {
         success: false,
         error: "Ticket not found",
@@ -25,7 +24,9 @@ export async function getTicket(
 
     return {
       success: true,
-      data: data,
+      data: {
+        hasATicket: false,
+      },
       message: "Ticket retrieved successfully",
     };
   } catch (e) {
