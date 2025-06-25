@@ -22,12 +22,18 @@ import { Price, Product } from "@/types/Product";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { createSessionCheckout } from "@/actions/stripe/create-session-checkout";
+import { useState } from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircleIcon } from "lucide-react";
 
 interface CheckoutFormProps {
   product: Product;
 }
 
 export default function CheckoutForm({ product }: CheckoutFormProps) {
+  const [error, setError] = useState<string | null>(null);
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -39,12 +45,19 @@ export default function CheckoutForm({ product }: CheckoutFormProps) {
     },
   });
 
-  function onSubmit(values: FormData) {
+  async function onSubmit(values: FormData) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
     console.log(values);
 
-    if (values.honeyPot != "") return;
+    if (values.honeyPot !== "") return;
+
+    const { success } = await createSessionCheckout(product.defaultPrice.id);
+
+    if (!success) {
+      setError("Failed to create checkout session. Please try again.");
+      return;
+    }
   }
 
   return (
@@ -53,6 +66,15 @@ export default function CheckoutForm({ product }: CheckoutFormProps) {
         className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-6"
         onSubmit={form.handleSubmit(onSubmit)}
       >
+        {error ? (
+          <Alert variant="destructive">
+            <AlertCircleIcon />
+            <AlertTitle>Failed to checkout. Please try again.</AlertTitle>
+            <AlertDescription>
+              <p>{error}</p>
+            </AlertDescription>
+          </Alert>
+        ) : null}
         {/* Left Side - Form */}
         <div className="">
           <Card>
