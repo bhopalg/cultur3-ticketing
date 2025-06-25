@@ -28,6 +28,7 @@ export async function getProduct(): Promise<ActionResponse<Product>> {
       data: {
         id: product.id,
         name: product.name,
+        description: product.description,
         defaultPrice: {
           id: defaultPrice.id,
           currency: defaultPrice.currency,
