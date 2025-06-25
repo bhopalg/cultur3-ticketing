@@ -3,6 +3,8 @@ import { stripe } from "@/lib/stripe";
 import { NextResponse } from "next/server";
 import supabaseAdmin from "@/lib/supabase/admin";
 
+// TODO: Add email to user when they purchase a ticket
+
 export async function POST(req: Request) {
   const body = await req.text();
   const signature = req.headers.get("stripe-signature")!;
