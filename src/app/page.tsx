@@ -1,6 +1,7 @@
 import { getProduct } from "@/actions/stripe/get-product";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircleIcon } from "lucide-react";
+import CheckoutForm from "@/components/checkout-form";
 
 export default async function Home() {
   const { success } = await getProduct();
@@ -8,17 +9,12 @@ export default async function Home() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left Side - Form */}
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Event Checkout
-              </h1>
-              <p className="text-gray-600 mt-1">
-                Complete your ticket purchase for Culture3
-              </p>
-            </div>
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Event Checkout</h1>
+            <p className="text-gray-600 mt-1">
+              Complete your ticket purchase for Culture3
+            </p>
           </div>
         </div>
 
@@ -33,7 +29,9 @@ export default async function Home() {
               </p>
             </AlertDescription>
           </Alert>
-        ) : null}
+        ) : (
+          <CheckoutForm />
+        )}
       </div>
     </div>
   );
