@@ -26,6 +26,7 @@ import { createSessionCheckout } from "@/actions/stripe/create-session-checkout"
 import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircleIcon } from "lucide-react";
+import { getMember } from "@/actions/supabase/get-member";
 
 interface CheckoutFormProps {
   product: Product;
@@ -46,13 +47,20 @@ export default function CheckoutForm({ product }: CheckoutFormProps) {
   });
 
   async function onSubmit(values: FormData) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
-
     if (values.honeyPot !== "") return;
 
-    const response = await createSessionCheckout(product.defaultPrice.id);
+    const memberResponse = await getMember(values.email);
+
+    if (!memberResponse.success) {
+      setError("Member not found. Please check your email or sign up.");
+      return;
+    }
+
+    const response = await createSessionCheckout(
+      product.defaultPrice.id,
+      memberResponse.data.email,
+      memberResponse.data.id,
+    );
 
     if (!response.success) {
       setError("Failed to create checkout session. Please try again.");

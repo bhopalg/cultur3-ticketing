@@ -6,6 +6,8 @@ import { Checkout } from "@/types/Checkout";
 
 export async function createSessionCheckout(
   priceId: string,
+  email: string,
+  memberId: string,
 ): Promise<ActionResponse<Checkout>> {
   try {
     const response = await stripe.checkout.sessions.create({
@@ -17,13 +19,11 @@ export async function createSessionCheckout(
         },
       ],
       mode: "payment",
-      success_url: "http://localhost:3000/?status=success",
-      cancel_url: "http://localhost:3000/?status=cancel",
-      // get email from the user
-      customer_email: "gbhopal91@gmail.com",
+      success_url: `${process.env.URL!}/?status=success`,
+      cancel_url: `${process.env.URL!}/?status=cancel`,
+      customer_email: email,
       metadata: {
-        // Add any additional metadata you want to store
-        id: "",
+        id: memberId,
       },
     });
 
