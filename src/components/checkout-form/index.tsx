@@ -27,6 +27,7 @@ import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircleIcon } from "lucide-react";
 import { getMember } from "@/actions/supabase/get-member";
+import { getTicket } from "@/actions/supabase/get-ticket";
 
 interface CheckoutFormProps {
   product: Product;
@@ -56,6 +57,13 @@ export default function CheckoutForm({ product }: CheckoutFormProps) {
       return;
     }
 
+    const existingTicket = await getTicket(memberResponse.data.id);
+
+    if (!existingTicket.success) {
+      setError("You already have a ticket. Please check your email.");
+      return;
+    }
+
     const response = await createSessionCheckout(
       product.defaultPrice.id,
       memberResponse.data.email,
@@ -67,7 +75,6 @@ export default function CheckoutForm({ product }: CheckoutFormProps) {
       return;
     }
 
-    // redirect to Stripe checkout
     if (response.data.url != null) {
       window.location.href = response.data.url;
     }
