@@ -7,6 +7,7 @@ import { pretty, render } from "@react-email/render";
 import { TicketConfirmationEmail } from "@/components/tickert-confirmation-email";
 import { formatPrice } from "@/components/checkout-form/utils/currency-formatter";
 import { Product } from "@/types/Product";
+import { EVENT_DETAILS } from "@/constants";
 
 const resend = new Resend(process.env.RESEND_API_KEY!);
 
@@ -31,9 +32,9 @@ export async function sendEmail(
     );
 
     const { error } = await resend.emails.send({
-      from: "onboarding@resend.dev",
+      from: process.env.RESEND_EMAIL!,
       to: member.email,
-      subject: `Your ticket for Cultur3`,
+      subject: `Your ticket for ${EVENT_DETAILS.eventName}`,
       html: html,
     });
 
