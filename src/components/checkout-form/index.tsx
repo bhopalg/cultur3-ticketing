@@ -18,18 +18,20 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Price, Product } from "@/types/Product";
+import { Product } from "@/types/Product";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { createSessionCheckout } from "@/actions/stripe/create-session-checkout";
 import { useState } from "react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircleIcon } from "lucide-react";
 import { getMember } from "@/actions/supabase/get-member";
 import { getTicket } from "@/actions/supabase/get-ticket";
 import { useSearchParams } from "next/navigation";
 import LoadingSpinner from "../loading-spinner";
+import CheckoutError from "@/components/checkout-form/checkout-error";
+import { formatPrice } from "@/components/checkout-form/utils/currency-formatter";
+import Required from "@/components/checkout-form/required";
+import Success from "@/components/checkout-form/success";
 
 interface CheckoutFormProps {
   product: Product;
@@ -101,20 +103,7 @@ export default function CheckoutForm({ product }: CheckoutFormProps) {
   }
 
   if (params.get("status") === "success") {
-    return (
-      <div className="bg-opacity-50 flex items-center justify-center z-50 mt-6">
-        <div className="bg-white rounded-lg p-8 mx-4 text-center animate-slideUp">
-          <div className="text-6xl mb-4">🎉</div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Success! 🌟</h2>
-          <p className="text-gray-600 mb-4">
-            You have successfully brought a ticket!
-          </p>
-          <p className="text-sm text-gray-500 mb-6">
-            Please check your email for confirmation and further details.
-          </p>
-        </div>
-      </div>
-    );
+    return <Success />;
   }
 
   return (
@@ -123,15 +112,7 @@ export default function CheckoutForm({ product }: CheckoutFormProps) {
         className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-6"
         onSubmit={form.handleSubmit(onSubmit)}
       >
-        {error ? (
-          <Alert variant="destructive" className="lg:col-span-2">
-            <AlertCircleIcon />
-            <AlertTitle>Failed to checkout. Please try again.</AlertTitle>
-            <AlertDescription>
-              <p>{error}</p>
-            </AlertDescription>
-          </Alert>
-        ) : null}
+        {error ? <CheckoutError error={error} /> : null}
         {/* Left Side - Form */}
         <div className="">
           <Card>
@@ -177,7 +158,7 @@ export default function CheckoutForm({ product }: CheckoutFormProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Last Name
+                      Email Address
                       <Required />{" "}
                     </FormLabel>
                     <FormControl>
@@ -271,21 +252,6 @@ export default function CheckoutForm({ product }: CheckoutFormProps) {
       </form>
     </Form>
   );
-}
-
-function Required() {
-  return <span className="text-red-600">*</span>;
-}
-
-export function formatPrice(price: Price) {
-  if (price.unitAmount === null) return "Free"; // Or show "N/A"
-
-  const formatter = new Intl.NumberFormat("en-GB", {
-    style: "currency",
-    currency: price.currency.toUpperCase(), // e.g., "GBP"
-  });
-
-  return formatter.format(price.unitAmount / 100);
 }
 
 // Image for ticket
