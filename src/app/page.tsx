@@ -2,6 +2,8 @@ import { getProduct } from "@/actions/stripe/get-product";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircleIcon } from "lucide-react";
 import CheckoutForm from "@/components/checkout-form";
+import { Suspense } from "react";
+import CheckoutSkeleton from "@/components/checkout-skeleton";
 
 export default async function Home() {
   const response = await getProduct();
@@ -30,7 +32,9 @@ export default async function Home() {
             </AlertDescription>
           </Alert>
         ) : (
-          <CheckoutForm product={response.data} />
+          <Suspense fallback={<CheckoutSkeleton />}>
+            <CheckoutForm product={response.data} />
+          </Suspense>
         )}
       </div>
     </div>

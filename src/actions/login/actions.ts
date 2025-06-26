@@ -1,11 +1,17 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { ActionResponse } from "@/types/ActionResponse";
 
-export async function validatePassword(password: string) {
+export async function validatePassword(
+  password: string,
+): Promise<ActionResponse<{ cookieSet: boolean }>> {
   if (password !== process.env.SITE_ACCESS_PASSWORD) {
-    throw new Error("Invalid password");
+    return {
+      success: false,
+      message: "Invalid password",
+      error: "The password you entered is incorrect. Please try again.",
+    };
   }
 
   const cookieStore = await cookies();
@@ -20,5 +26,9 @@ export async function validatePassword(password: string) {
     secure: process.env.NODE_ENV === "production",
   });
 
-  redirect("/"); // ✅ Redirect after success
+  return {
+    success: true,
+    data: { cookieSet: true },
+    message: "Access granted",
+  };
 }

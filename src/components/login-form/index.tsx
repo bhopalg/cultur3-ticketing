@@ -18,11 +18,14 @@ import {
 import { AlertCircleIcon, Eye, EyeOff } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { validatePassword } from "@/actions/login/actions";
+import { useRouter } from "next/navigation";
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const router = useRouter();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -36,11 +39,18 @@ export default function LoginForm() {
     setError("");
 
     try {
-      await validatePassword(data.password);
+      const response = await validatePassword(data.password);
+
+      if (!response.success) {
+        setError(response.error || "Invalid password");
+        setIsLoading(false);
+        return;
+      }
+
+      router.push("/");
     } catch (e) {
       console.error("Login failed:", e);
       setError(e instanceof Error ? e.message : "An unexpected error occurred");
-    } finally {
       setIsLoading(false);
     }
   }
