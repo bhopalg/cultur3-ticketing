@@ -3,6 +3,7 @@
 import { stripe } from "@/lib/stripe";
 import { ActionResponse } from "@/types/ActionResponse";
 import { Checkout } from "@/types/Checkout";
+import { TICKET_QUANTITY } from "@/constants";
 
 export async function createSessionCheckout(
   priceId: string,
@@ -15,7 +16,7 @@ export async function createSessionCheckout(
       line_items: [
         {
           price: priceId,
-          quantity: 1,
+          quantity: TICKET_QUANTITY,
         },
       ],
       mode: "payment",

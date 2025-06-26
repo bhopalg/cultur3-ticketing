@@ -99,7 +99,6 @@ export default function CheckoutForm({ product }: CheckoutFormProps) {
 
         {/* Left Side - Form */}
         <LeftPanel form={form} />
-
         {/* Right Side - Order Summary */}
         <RightPanel product={product} loading={loading} />
       </form>

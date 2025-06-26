@@ -2,8 +2,8 @@ import Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { NextResponse } from "next/server";
 import supabaseAdmin from "@/lib/supabase/admin";
-
-// TODO: Add email to user when they purchase a ticket
+import { getProduct } from "@/actions/stripe/get-product";
+import { sendEmail } from "@/actions/resend/send-email";
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -63,6 +63,9 @@ export async function POST(req: Request) {
       );
       return NextResponse.json({ error: insertError.message }, { status: 500 });
     }
+
+    const { data } = await getProduct();
+    await sendEmail(member, session.id, data);
   }
 
   return NextResponse.json({ received: true });
