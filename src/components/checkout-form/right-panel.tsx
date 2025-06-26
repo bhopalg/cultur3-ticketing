@@ -10,6 +10,8 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import LoadingSpinner from "@/components/loading-spinner";
 import { Product } from "@/types/Product";
+import StripeIcon from "@/components/icons/stripe";
+import { Link } from "@react-email/components";
 
 interface RightPanelProps {
   product: Product;
@@ -71,9 +73,21 @@ export default function RightPanel({ product, loading }: RightPanelProps) {
               <>Complete Booking - {formatPrice(product.defaultPrice)}</>
             )}
           </Button>
-          <p className="text-xs text-gray-500 text-center">
-            Powered by Stripe.
-          </p>
+          <div className="flex items-center flex-col gap-2">
+            <Link
+              href="https://stripe.com/"
+              target="_blank"
+              className="flex items-center justify-center gap-1"
+            >
+              <p className="text-xs text-gray-500 text-center">Powered by</p>
+              <StripeIcon className="text-gray-500" />
+            </Link>
+            <Link href="https://gbhopal.com" target="_blank">
+              <p className="text-xs text-gray-500 text-center">
+                Designed By Gurps
+              </p>
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </div>
